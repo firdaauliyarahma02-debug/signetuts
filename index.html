@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WebGIS Fasilitas Umum</title>
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet">
+
+<style>
+html, body {
+    margin: 0;
+    height: 100%;
+    font-family: Arial, sans-serif;
+}
+body {
+    overflow: hidden;
+}
+#app {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+/* LANDING */
+#landingPage {
+    position: absolute;
+    inset: 0;
+    z-index: 9000;
+    background: url('./assets/image/pekalongan.png') center center / cover no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#landingPage::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+}
+.landing-content {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    color: #fff;
+    padding: 20px;
+}
+.landing-title {
+    font-size: 64px;
+    font-weight: 800;
+    margin: 0 0 24px 0;
+    text-transform: uppercase;
+    line-height: 1.05;
+}
+.landing-subtitle {
+    font-size: 18px;
+    margin: 0 0 24px 0;
+}
+.landing-btn {
+    border: none;
+    background: #2563eb;
+    color: white;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.landing-btn:hover {
+    opacity: 0.92;
+}
+
+/* MAIN */
+#mainApp {
+    position: absolute;
+    inset: 0;
+}
+#map {
+    position: absolute;
+    top: 64px;
+    bottom: 60px;
+    width: 100%;
+}
+
+/* HEADER */
+.header {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    height: 64px;
+    background: #082552;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 16px;
+    box-sizing: border-box;
+    z-index: 3000;
+}
+.header-title {
+    font-size: 18px;
+    font-weight: 700;
+}
+.header-actions {
+    display: flex;
+    gap: 10px;
+}
+.btn {
+    padding: 8px 14px;
+    border: none;
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    font-weight: 700;
+}
+.btn:disabled {
+    opacity: 0.8;
+    cursor: wait;
+}
+.red { background: #ef4444; }
+.green { background: #16a34a; }
+.blue { background: #2563eb; }
+
+/* LEFT PANEL */
+.left-tools {
+    position: absolute;
+    top: 86px;
+    left: 12px;
+    width: 280px;
+    background: rgba(255,255,255,.96);
+    border-radius: 12px;
+    box-shadow: 0 8px 20px rgba(0,0,0,.15);
+    z-index: 1800;
+    padding: 12px;
+}
+.left-tools h3 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: #111827;
+}
+.search-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    outline: none;
+}
+.result-list {
+    max-height: 160px;
+    overflow: auto;
+}
+.result-item {
+    padding: 8px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+}
+.result-item:hover {
+    background: #f3f4f6;
+}
+
+/* ROUTE */
+.route-panel {
+    position: absolute;
+    top: 78px;
+    right: 12px;
+    width: 360px;
+    background: rgba(255,255,255,.96);
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0,0,0,.15);
+    z-index: 1800;
+    padding: 12px;
+}
+.route-box {
+    display: grid;
+    grid-template-columns: 46px 1fr;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    overflow: hidden;
+}
+.route-label {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+}
+.route-label.a { background: #36b9eb; }
+.route-label.b { background: #8d87e8; }
+.route-input {
+    border: none;
+    border-bottom: 1px solid #eee;
+    padding: 14px 10px;
+    font-size: 14px;
+    outline: none;
+    background: #fff;
+}
+.route-input:last-child {
+    border-bottom: none;
+}
+.route-actions {
+    margin-top: 10px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.route-actions button {
+    border: none;
+    background: #ececec;
+    color: #444;
+    padding: 8px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+}
+.route-actions button.active {
+    background: #dedede;
+    font-weight: 700;
+}
+#routeInfo {
+    margin-top: 10px;
+    font-size: 13px;
+    color: #111827;
+}
+.route-help {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #555;
+    line-height: 1.4;
+}
+
+/* MINI LAYER */
+.layer-mini {
+    position: absolute;
+    bottom: 82px;
+    left: 12px;
+    width: 230px;
+    background: rgba(255,255,255,.96);
+    padding: 12px;
+    border-radius: 10px;
+    z-index: 1800;
+    box-shadow: 0 8px 20px rgba(0,0,0,.15);
+}
+.layer-mini h3 {
+    margin: 0 0 8px 0;
+}
+.mini-layer-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+.mini-layer-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.mini-zoom-btn {
+    border: none;
+    background: #2563eb;
+    color: white;
+    border-radius: 6px;
+    padding: 6px 8px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+/* SIDEBAR */
+.sidebar {
+    position: absolute;
+    right: -420px;
+    top: 64px;
+    bottom: 60px;
+    width: 400px;
+    background: rgba(255,255,255,.98);
+    z-index: 3200;
+    box-shadow: -8px 0 24px rgba(0,0,0,.18);
+    transition: right .3s ease;
+    display: flex;
+    flex-direction: column;
+}
+.sidebar.show {
+    right: 0;
+}
+.sidebar-tabs {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+}
+.sidebar-tab {
+    flex: 1;
+    padding: 12px;
+    text-align: center;
+    cursor: pointer;
+    font-weight: 700;
+    background: #f3f4f6;
+}
+.sidebar-tab.active {
+    background: white;
+    color: #082552;
+}
+.sidebar-content {
+    flex: 1;
+    overflow: auto;
+    padding: 14px;
+    box-sizing: border-box;
+}
+.tab-pane {
+    display: none;
+}
+.tab-pane.active {
+    display: block;
+}
+.layer-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    margin-bottom: 8px;
+    border-radius: 8px;
+    background: #f9fafb;
+}
+.layer-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.layer-zoom-btn {
+    border: none;
+    background: #2563eb;
+    color: white;
+    border-radius: 6px;
+    padding: 6px 8px;
+    cursor: pointer;
+    font-size: 12px;
+}
+.qgis-open-btn {
+    border: none;
+    background: #2563eb;
+    color: white;
+    border-radius: 8px;
+    padding: 10px 14px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 14px;
+}
+
+/* NOTIF */
+#notif {
+    position: absolute;
+    top: 76px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 5000;
+    background: #dc2626;
+    color: white;
+    padding: 10px 16px;
+    border-radius: 10px;
+    font-weight: 700;
+    display: none;
+}
+
+/* FOOTER */
+.footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    height: 60px;
+    background: #082552;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3000;
+}
+
+/* QGIS OVERLAY */
+.qgis-fullscreen {
+    position: absolute;
+    top: 64px;
+    left: 0;
+    right: 0;
+    bottom: 60px;
+    background: #fff;
+    z-index: 1500;
+    display: none;
+}
+.qgis-fullscreen.show {
+    display: block;
+}
+.qgis-fullscreen-frame {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+}
+.qgis-active-badge {
+    position: absolute;
+    top: 76px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 4500;
+    background: rgba(8,37,82,.95);
+    color: #fff;
+    padding: 8px 14px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    display: none;
+}
+.qgis-active-badge.show {
+    display: block;
+}
+
+.mapboxgl-popup-content {
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13px;
+}
+
+@media (max-width: 900px) {
+    .landing-title {
+        font-size: 42px;
+    }
+    .sidebar {
+        width: 100%;
+        right: -100%;
+    }
+    .route-panel {
+        width: calc(100% - 24px);
+    }
+    .left-tools {
+        width: calc(100% - 24px);
+    }
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+    <section id="landingPage">
+        <div class="landing-content">
+            <h1 class="landing-title">WEBGIS FASILITAS UMUM</h1>
+            <p class="landing-subtitle">Lokasi Fasilitas Umum Kabupaten Pekalongan</p>
+            <button id="btnEnterMap" class="landing-btn">Selengkapnya</button>
+        </div>
+    </section>
+
+    <div id="mainApp">
+        <div class="header">
+            <div class="header-title">Fasilitas Umum Kabupaten Pekalongan</div>
+            <div class="header-actions">
+                <button class="btn red" id="btnHome">Beranda</button>
+                <button class="btn green" id="btnCenter">Lokasi Anda</button>
+                <button class="btn blue" id="btnToggleMenu">Menu</button>
+            </div>
+        </div>
+
+        <div id="map"></div>
+        <div id="notif"></div>
+        <div id="qgisActiveBadge" class="qgis-active-badge">Mode qgis2web aktif</div>
+
+        <div class="qgis-fullscreen" id="qgisFullscreen">
+            <iframe
+                id="qgisFullscreenFrame"
+                class="qgis-fullscreen-frame"
+                src="./qgis2web/index.html"
+                title="qgis2web fullscreen">
+            </iframe>
+        </div>
+
+        <div class="left-tools">
+            <h3>Pencarian Tempat</h3>
+            <input id="placeSearch" class="search-input" placeholder="Cari lokasi / alamat...">
+            <div id="placeResults" class="result-list"></div>
+
+            <h3 style="margin-top:16px;">Pencarian Fitur</h3>
+            <input id="featureSearch" class="search-input" placeholder="Cari hotel, sekolah, rumah sakit...">
+            <div id="featureResults" class="result-list"></div>
+        </div>
+
+        <div class="route-panel">
+            <div class="route-box">
+                <div class="route-label a">A</div>
+                <input id="start" class="route-input" placeholder="Klik peta untuk titik awal" readonly>
+                <div class="route-label b">B</div>
+                <input id="end" class="route-input" placeholder="Klik peta untuk titik tujuan" readonly>
+            </div>
+
+            <div class="route-actions">
+                <button type="button">Traffic</button>
+                <button type="button" class="active" data-profile="driving">Driving</button>
+                <button type="button" data-profile="walking">Walking</button>
+                <button type="button" id="btnRoute">Cari Rute</button>
+                <button type="button" id="btnClearRoute">Hapus</button>
+            </div>
+
+            <div class="route-help">
+                Klik peta sekali untuk titik awal, klik lagi untuk titik tujuan. Setelah dua titik dipilih, rute akan dibuat otomatis.
+            </div>
+
+            <div id="routeInfo"></div>
+        </div>
+
+        <div class="layer-mini">
+            <h3>Layer</h3>
+
+            <div class="mini-layer-row">
+                <div class="mini-layer-left"><input type="checkbox" checked id="miniBangunan"> <label for="miniBangunan">Bangunan Umum</label></div>
+                <button class="mini-zoom-btn" data-zoom-layer="bangunan">Zoom</button>
+            </div>
+
+            <div class="mini-layer-row">
+                <div class="mini-layer-left"><input type="checkbox" checked id="miniHotel"> <label for="miniHotel">Hotel</label></div>
+                <button class="mini-zoom-btn" data-zoom-layer="hotel">Zoom</button>
+            </div>
+
+            <div class="mini-layer-row">
+                <div class="mini-layer-left"><input type="checkbox" checked id="miniRS"> <label for="miniRS">Rumah Sakit</label></div>
+                <button class="mini-zoom-btn" data-zoom-layer="rs">Zoom</button>
+            </div>
+
+            <div class="mini-layer-row">
+                <div class="mini-layer-left"><input type="checkbox" checked id="miniSekolah"> <label for="miniSekolah">Sekolah</label></div>
+                <button class="mini-zoom-btn" data-zoom-layer="sekolah">Zoom</button>
+            </div>
+        </div>
+
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-tabs">
+                <div class="sidebar-tab active" data-tab="fitur">Fitur</div>
+                <div class="sidebar-tab" data-tab="qgis">qgis2web</div>
+            </div>
+
+            <div class="sidebar-content">
+                <div class="tab-pane active" id="tab-fitur">
+                    <h3>Pencarian Tempat</h3>
+                    <input id="placeSearchSidebar" class="search-input" placeholder="Cari lokasi / alamat...">
+                    <div id="placeResultsSidebar"></div>
+
+                    <h3 style="margin-top:16px;">Pencarian Fitur qgis2web</h3>
+                    <input id="featureSearchSidebar" class="search-input" placeholder="Cari hotel, sekolah, rumah sakit...">
+                    <div id="featureResultsSidebar"></div>
+
+                    <h3 style="margin-top:16px;">Kontrol Layer</h3>
+                    <div id="layerList"></div>
+                </div>
+
+                <div class="tab-pane" id="tab-qgis">
+                    <h3>Hasil qgis2web Asli</h3>
+                    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                        <button type="button" id="btnOpenQgisFullscreen" class="qgis-open-btn">
+                            Buka Fullscreen qgis2web
+                        </button>
+                        <button type="button" id="btnCloseQgisInline" class="qgis-open-btn" style="background:#ef4444;">
+                            Tutup qgis2web
+                        </button>
+                    </div>
+                    <p style="font-size:13px;color:#555;margin-top:12px;">
+                        Saat mode qgis2web aktif, fitur pencarian, layer, lokasi, dan analisis jaringan tetap dapat digunakan.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">Copyright © Firda Auliya Rahma_117230060</div>
+    </div>
+</div>
+
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
+<script>
+mapboxgl.accessToken = 'pk.eyJ1IjoiZmlyZGFhdWxpeWFyYWhtYSIsImEiOiJjbW5wdnI2eWQwMHZ4MzBwc2E5aGNkbm1oIn0.jLkgH9Y1ywcPyrg19wPi9w';
+
+const sourceFiles = {
+    bangunan: 'assets/geojson/Bangunan umum lainnya.geojson',
+    hotel: 'assets/geojson/Hotel.geojson',
+    rs: 'assets/geojson/Rumah_Sakit.geojson',
+    sekolah: 'assets/geojson/Sekolah.geojson'
+};
+
+const layerConfig = {
+    bangunan: { label: 'Bangunan Umum', color: '#f3d2b8', outline: '#1f1f1f' },
+    hotel: { label: 'Hotel', color: '#4aa3ff', outline: '#1f1f1f' },
+    rs: { label: 'Rumah Sakit', color: '#ff8c00', outline: '#1f1f1f' },
+    sekolah: { label: 'Sekolah', color: '#ff66cc', outline: '#1f1f1f' }
+};
+
+const qgisLayerWindowNames = {
+    bangunan: ['lyr_Bangunanumumlainnya_1', 'layer_Bangunanumumlainnya_1'],
+    hotel: ['lyr_Hotel_2', 'layer_Hotel_2'],
+    rs: ['lyr_Rumah_Sakit_3', 'layer_Rumah_Sakit_3'],
+    sekolah: ['lyr_Sekolah_4', 'layer_Sekolah_4']
+};
+
+const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/streets-v12',
+    center: [109.67, -6.89],
+    zoom: 14
+});
+map.addControl(new mapboxgl.NavigationControl(), 'top-left');
+
+let bounds = new mapboxgl.LngLatBounds();
+let hasBounds = false;
+let userMarker = null;
+let routingProfile = 'driving';
+
+let startCoord = null;
+let endCoord = null;
+let startMarker = null;
+let endMarker = null;
+
+const landingPage = document.getElementById('landingPage');
+const btnEnterMap = document.getElementById('btnEnterMap');
+
+const qgisFullscreen = document.getElementById('qgisFullscreen');
+const qgisFullscreenFrame = document.getElementById('qgisFullscreenFrame');
+const qgisActiveBadge = document.getElementById('qgisActiveBadge');
+
+const startInput = document.getElementById('start');
+const endInput = document.getElementById('end');
+const routeInfo = document.getElementById('routeInfo');
+
+btnEnterMap.addEventListener('click', () => {
+    landingPage.style.display = 'none';
+    setTimeout(() => {
+        map.resize();
+        if (hasBounds) {
+            map.fitBounds(bounds, {
+                padding: { top: 80, right: 370, bottom: 80, left: 220 },
+                duration: 500,
+                maxZoom: 17
+            });
+        }
+    }, 100);
+});
+
+function isQgisActive() {
+    return qgisFullscreen.classList.contains('show');
+}
+
+function showNotif(msg, type='error') {
+    const n = document.getElementById('notif');
+    n.textContent = msg;
+    n.style.display = 'block';
+    n.style.background = type === 'success' ? '#16a34a' : '#dc2626';
+    clearTimeout(n._timer);
+    n._timer = setTimeout(() => n.style.display = 'none', 3000);
+}
+
+function formatCoord(coord) {
+    return coord[1].toFixed(6) + ', ' + coord[0].toFixed(6);
+}
+
+function resetRouteSelectionUI() {
+    startInput.value = '';
+    endInput.value = '';
+    routeInfo.innerHTML = '';
+}
+
+function clearMapboxRouteMarkers() {
+    if (startMarker) {
+        startMarker.remove();
+        startMarker = null;
+    }
+    if (endMarker) {
+        endMarker.remove();
+        endMarker = null;
+    }
+}
+
+function addMapboxPointMarker(coord, label) {
+    const color = label === 'A' ? '#36b9eb' : '#8d87e8';
+    const el = document.createElement('div');
+    el.style.width = '28px';
+    el.style.height = '28px';
+    el.style.borderRadius = '50%';
+    el.style.background = color;
+    el.style.color = '#fff';
+    el.style.display = 'flex';
+    el.style.alignItems = 'center';
+    el.style.justifyContent = 'center';
+    el.style.fontWeight = '700';
+    el.style.border = '2px solid #fff';
+    el.textContent = label;
+    return new mapboxgl.Marker({ element: el }).setLngLat(coord).addTo(map);
+}
+
+function addCoordsToBounds(coords) {
+    if (!Array.isArray(coords)) return;
+    if (typeof coords[0] === 'number' && typeof coords[1] === 'number') {
+        bounds.extend(coords);
+        hasBounds = true;
+        return;
+    }
+    coords.forEach(addCoordsToBounds);
+}
+
+function getFeatureLabel(props = {}) {
+    const preferred = ['nama', 'name', 'Nama', 'NAMA', 'title', 'Title', 'jenis', 'kategori', 'kelas'];
+    for (const k of preferred) {
+        if (props[k]) return String(props[k]);
+    }
+    for (const k in props) {
+        if (props[k] !== null && props[k] !== undefined && String(props[k]).trim() !== '') {
+            return String(props[k]);
+        }
+    }
+    return '(tanpa nama)';
+}
+
+async function fetchGeoJSON(url) {
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('Gagal memuat ' + url);
+    return await res.json();
+}
+
+/* QGIS helpers */
+function getQgisContext() {
+    try {
+        const win = qgisFullscreenFrame.contentWindow;
+        if (!win || !win.map || !win.ol) return null;
+        return win;
+    } catch (e) {
+        return null;
+    }
+}
+
+function getQgisLayerRef(key) {
+    const ctx = getQgisContext();
+    if (!ctx) return null;
+    const candidates = qgisLayerWindowNames[key] || [];
+    for (const name of candidates) {
+        if (ctx[name]) return ctx[name];
+    }
+    return null;
+}
+
+function getQgisCombinedExtent() {
+    const ctx = getQgisContext();
+    if (!ctx) return null;
+    const ol = ctx.ol;
+    const extents = [];
+    Object.keys(qgisLayerWindowNames).forEach(key => {
+        const lyr = getQgisLayerRef(key);
+        if (lyr && lyr.getSource && lyr.getSource().getExtent) {
+            const ex = lyr.getSource().getExtent();
+            if (ex && isFinite(ex[0])) extents.push(ex);
+        }
+    });
+    if (!extents.length) return null;
+    const all = extents[0].slice();
+    for (let i = 1; i < extents.length; i++) ol.extent.extend(all, extents[i]);
+    return all;
+}
+
+function ensureQgisLocateLayer() {
+    const ctx = getQgisContext();
+    if (!ctx) return null;
+    const ol = ctx.ol;
+
+    if (!ctx.__customLocateSource) {
+        ctx.__customLocateSource = new ol.source.Vector();
+        ctx.__customLocateLayer = new ol.layer.Vector({
+            source: ctx.__customLocateSource,
+            zIndex: 9999
+        });
+        ctx.map.addLayer(ctx.__customLocateLayer);
+    }
+    return ctx;
+}
+
+function ensureQgisRouteLayer() {
+    const ctx = getQgisContext();
+    if (!ctx) return null;
+    const ol = ctx.ol;
+
+    if (!ctx.__customRouteSource) {
+        ctx.__customRouteSource = new ol.source.Vector();
+        ctx.__customRouteLayer = new ol.layer.Vector({
+            source: ctx.__customRouteSource,
+            zIndex: 9998,
+            style: new ol.style.Style({
+                stroke: new ol.style.Stroke({
+                    color: '#2563eb',
+                    width: 5
+                })
+            })
+        });
+        ctx.map.addLayer(ctx.__customRouteLayer);
+    }
+    return ctx;
+}
+
+function qgisClearSelections() {
+    const ctx1 = ensureQgisLocateLayer();
+    if (ctx1 && ctx1.__customLocateSource) ctx1.__customLocateSource.clear();
+
+    const ctx2 = ensureQgisRouteLayer();
+    if (ctx2 && ctx2.__customRouteSource) ctx2.__customRouteSource.clear();
+}
+
+function qgisAddPointMarker(coordLonLat, label) {
+    const ctx = ensureQgisLocateLayer();
+    if (!ctx) return;
+    const ol = ctx.ol;
+    const coord = ol.proj.fromLonLat(coordLonLat);
+
+    const feature = new ol.Feature({
+        geometry: new ol.geom.Point(coord)
+    });
+
+    const fill = label === 'A' ? '#36b9eb' : '#8d87e8';
+
+    feature.setStyle(new ol.style.Style({
+        image: new ol.style.Circle({
+            radius: 9,
+            fill: new ol.style.Fill({ color: fill }),
+            stroke: new ol.style.Stroke({ color: '#ffffff', width: 3 })
+        }),
+        text: new ol.style.Text({
+            text: label,
+            fill: new ol.style.Fill({ color: '#ffffff' }),
+            font: 'bold 12px Arial'
+        })
+    }));
+
+    ctx.__customLocateSource.addFeature(feature);
+}
+
+function qgisToggleLayer(key, visible) {
+    const lyr = getQgisLayerRef(key);
+    if (lyr && lyr.setVisible) lyr.setVisible(visible);
+}
+
+function qgisGetLayerVisible(key) {
+    const lyr = getQgisLayerRef(key);
+    return lyr ? lyr.getVisible() : true;
+}
+
+function qgisZoomToLayer(key) {
+    const ctx = getQgisContext();
+    const lyr = getQgisLayerRef(key);
+    if (!ctx || !lyr || !lyr.getSource || !lyr.getSource().getExtent) return;
+    const ex = lyr.getSource().getExtent();
+    if (ex && isFinite(ex[0])) {
+        ctx.map.getView().fit(ex, { padding: [60,60,60,60], duration: 700, maxZoom: 18 });
+    }
+}
+
+function qgisGoHome() {
+    const ctx = getQgisContext();
+    const ex = getQgisCombinedExtent();
+    if (ctx && ex) {
+        ctx.map.getView().fit(ex, { padding: [60,60,60,60], duration: 700, maxZoom: 17 });
+    }
+}
+
+function qgisLocate(coordLonLat) {
+    const ctx = ensureQgisLocateLayer();
+    if (!ctx) return false;
+    const ol = ctx.ol;
+    const coord = ol.proj.fromLonLat(coordLonLat);
+
+    const pointFeature = new ol.Feature({
+        geometry: new ol.geom.Point(coord)
+    });
+    pointFeature.setStyle(new ol.style.Style({
+        image: new ol.style.Circle({
+            radius: 7,
+            fill: new ol.style.Fill({ color: '#16a34a' }),
+            stroke: new ol.style.Stroke({ color: '#ffffff', width: 3 })
+        })
+    }));
+    ctx.__customLocateSource.addFeature(pointFeature);
+
+    const ex = getQgisCombinedExtent();
+    let inside = true;
+    if (ex) inside = ol.extent.containsCoordinate(ex, coord);
+
+    ctx.map.getView().animate({
+        center: coord,
+        zoom: inside ? 17 : 14,
+        duration: 1000
+    });
+
+    return inside;
+}
+
+function qgisCenterToLonLat(coordLonLat, zoom = 16) {
+    const ctx = getQgisContext();
+    if (!ctx) return;
+    const coord = ctx.ol.proj.fromLonLat(coordLonLat);
+    ctx.map.getView().animate({ center: coord, zoom, duration: 700 });
+}
+
+function qgisSearchFeatures(q, limit = 20) {
+    const results = [];
+    const ctx = getQgisContext();
+    if (!ctx) return results;
+
+    Object.keys(layerConfig).forEach(key => {
+        const lyr = getQgisLayerRef(key);
+        if (!lyr || !lyr.getSource || !lyr.getSource().getFeatures) return;
+
+        lyr.getSource().getFeatures().forEach(ft => {
+            if (results.length >= limit) return;
+            const props = ft.getProperties ? ft.getProperties() : {};
+            const txt = JSON.stringify(props).toLowerCase();
+            if (txt.includes(q)) {
+                results.push({
+                    key,
+                    label: layerConfig[key].label + ' - ' + getFeatureLabel(props),
+                    feature: ft
+                });
+            }
+        });
+    });
+
+    return results;
+}
+
+function qgisZoomToFeature(ft) {
+    const ctx = getQgisContext();
+    if (!ctx || !ft || !ft.getGeometry) return;
+    const geom = ft.getGeometry();
+    if (!geom) return;
+    const ex = geom.getExtent();
+    ctx.map.getView().fit(ex, { padding: [80,80,80,80], duration: 700, maxZoom: 18 });
+}
+
+function qgisBindClickRouting() {
+    const ctx = getQgisContext();
+    if (!ctx || ctx.__routeClickBound) return;
+    ctx.__routeClickBound = true;
+
+    ctx.map.on('singleclick', function(evt) {
+        if (!isQgisActive()) return;
+
+        const coord = ctx.ol.proj.toLonLat(evt.coordinate);
+        handleRoutePointSelection(coord);
+    });
+}
+
+/* General helpers */
+function toggleLayer(key, visible) {
+    if (isQgisActive()) {
+        qgisToggleLayer(key, visible);
+    } else {
+        const vis = visible ? 'visible' : 'none';
+        if (map.getLayer(key + '-fill')) map.setLayoutProperty(key + '-fill', 'visibility', vis);
+        if (map.getLayer(key + '-outline')) map.setLayoutProperty(key + '-outline', 'visibility', vis);
+    }
+}
+
+function getLayerVisible(key) {
+    if (isQgisActive()) return qgisGetLayerVisible(key);
+    if (map.getLayer(key + '-fill')) return map.getLayoutProperty(key + '-fill', 'visibility') !== 'none';
+    return true;
+}
+
+function syncMiniChecks() {
+    document.getElementById('miniHotel').checked = getLayerVisible('hotel');
+    document.getElementById('miniRS').checked = getLayerVisible('rs');
+    document.getElementById('miniSekolah').checked = getLayerVisible('sekolah');
+    document.getElementById('miniBangunan').checked = getLayerVisible('bangunan');
+}
+
+function zoomToSource(key) {
+    if (isQgisActive()) {
+        qgisZoomToLayer(key);
+        return;
+    }
+
+    const src = map.getSource(key);
+    if (!src || !src._data) return;
+    const b = new mapboxgl.LngLatBounds();
+    let ok = false;
+
+    src._data.features.forEach(f => {
+        const coords = [];
+        const collect = (arr) => {
+            if (!Array.isArray(arr)) return;
+            if (typeof arr[0] === 'number' && typeof arr[1] === 'number') {
+                coords.push(arr);
+                return;
+            }
+            arr.forEach(collect);
+        };
+        collect(f.geometry.coordinates);
+        coords.forEach(c => {
+            b.extend(c);
+            ok = true;
+        });
+    });
+
+    if (ok) map.fitBounds(b, { padding: 60, duration: 700, maxZoom: 18 });
+}
+
+function renderLayerControls() {
+    const layerList = document.getElementById('layerList');
+    layerList.innerHTML = '';
+
+    Object.keys(layerConfig).forEach(key => {
+        const row = document.createElement('div');
+        row.className = 'layer-item';
+
+        const left = document.createElement('div');
+        left.className = 'layer-left';
+
+        const chk = document.createElement('input');
+        chk.type = 'checkbox';
+        chk.checked = getLayerVisible(key);
+        chk.addEventListener('change', () => {
+            toggleLayer(key, chk.checked);
+            syncMiniChecks();
+            renderLayerControls();
+        });
+
+        const name = document.createElement('div');
+        name.textContent = layerConfig[key].label;
+
+        left.appendChild(chk);
+        left.appendChild(name);
+
+        const zoomBtn = document.createElement('button');
+        zoomBtn.className = 'layer-zoom-btn';
+        zoomBtn.textContent = 'Zoom';
+        zoomBtn.addEventListener('click', () => zoomToSource(key));
+
+        row.appendChild(left);
+        row.appendChild(zoomBtn);
+        layerList.appendChild(row);
+    });
+}
+
+function resetRouteSelection() {
+    startCoord = null;
+    endCoord = null;
+    resetRouteSelectionUI();
+    clearMapboxRouteMarkers();
+    qgisClearSelections();
+
+    if (!isQgisActive()) {
+        if (map.getLayer('route-line')) map.removeLayer('route-line');
+        if (map.getSource('route')) map.removeSource('route');
+    }
+}
+
+function handleRoutePointSelection(coord) {
+    if (!startCoord) {
+        startCoord = coord;
+        startInput.value = formatCoord(coord);
+
+        if (isQgisActive()) {
+            qgisClearSelections();
+            qgisAddPointMarker(coord, 'A');
+        } else {
+            clearMapboxRouteMarkers();
+            startMarker = addMapboxPointMarker(coord, 'A');
+        }
+
+        routeInfo.innerHTML = '<b>Titik awal dipilih.</b> Klik satu titik lagi untuk tujuan.';
+        return;
+    }
+
+    if (!endCoord) {
+        endCoord = coord;
+        endInput.value = formatCoord(coord);
+
+        if (isQgisActive()) {
+            qgisAddPointMarker(coord, 'B');
+        } else {
+            endMarker = addMapboxPointMarker(coord, 'B');
+        }
+
+        drawRoute();
+        return;
+    }
+
+    resetRouteSelection();
+    startCoord = coord;
+    startInput.value = formatCoord(coord);
+
+    if (isQgisActive()) {
+        qgisAddPointMarker(coord, 'A');
+    } else {
+        startMarker = addMapboxPointMarker(coord, 'A');
+    }
+
+    routeInfo.innerHTML = '<b>Titik awal baru dipilih.</b> Klik lagi untuk tujuan.';
+}
+
+/* Load Mapbox data */
+map.on('load', async () => {
+    try {
+        const datasets = {
+            bangunan: await fetchGeoJSON(sourceFiles.bangunan),
+            hotel: await fetchGeoJSON(sourceFiles.hotel),
+            rs: await fetchGeoJSON(sourceFiles.rs),
+            sekolah: await fetchGeoJSON(sourceFiles.sekolah)
+        };
+
+        Object.keys(datasets).forEach(key => {
+            map.addSource(key, {
+                type: 'geojson',
+                data: datasets[key]
+            });
+
+            map.addLayer({
+                id: key + '-fill',
+                type: 'fill',
+                source: key,
+                paint: {
+                    'fill-color': layerConfig[key].color,
+                    'fill-opacity': 0.72
+                }
+            });
+
+            map.addLayer({
+                id: key + '-outline',
+                type: 'line',
+                source: key,
+                paint: {
+                    'line-color': layerConfig[key].outline,
+                    'line-width': 1.1
+                }
+            });
+
+            datasets[key].features.forEach(f => addCoordsToBounds(f.geometry.coordinates));
+
+            map.on('click', key + '-fill', (e) => {
+                if (isQgisActive()) return;
+                const props = e.features[0].properties || {};
+                let html = '<table style="border-collapse:collapse;width:100%;">';
+                Object.keys(props).forEach(k => {
+                    html += '<tr><td style="border:1px solid #ddd;padding:6px;"><b>' + k + '</b></td><td style="border:1px solid #ddd;padding:6px;">' + props[k] + '</td></tr>';
+                });
+                html += '</table>';
+
+                new mapboxgl.Popup()
+                    .setLngLat(e.lngLat)
+                    .setHTML(html)
+                    .addTo(map);
+            });
+
+            map.on('mouseenter', key + '-fill', () => { if (!isQgisActive()) map.getCanvas().style.cursor = 'pointer'; });
+            map.on('mouseleave', key + '-fill', () => map.getCanvas().style.cursor = '');
+        });
+
+        if (hasBounds) {
+            map.fitBounds(bounds, {
+                padding: { top: 80, right: 370, bottom: 80, left: 220 },
+                duration: 500,
+                maxZoom: 17
+            });
+        }
+
+        renderLayerControls();
+        syncMiniChecks();
+    } catch (err) {
+        console.error(err);
+        showNotif('Data GeoJSON gagal dimuat.');
+    }
+});
+
+/* Click route on Mapbox */
+map.on('click', (e) => {
+    if (isQgisActive()) return;
+    handleRoutePointSelection([e.lngLat.lng, e.lngLat.lat]);
+});
+
+/* Home & location */
+document.getElementById('btnHome').addEventListener('click', () => {
+    if (landingPage.style.display !== 'none') {
+        landingPage.style.display = 'flex';
+        return;
+    }
+
+    if (isQgisActive()) {
+        qgisGoHome();
+        return;
+    }
+    if (hasBounds) {
+        map.fitBounds(bounds, {
+            padding: { top: 80, right: 370, bottom: 80, left: 220 },
+            duration: 700,
+            maxZoom: 17
+        });
+    }
+});
+
+document.getElementById('btnCenter').addEventListener('click', () => {
+    if (!navigator.geolocation) {
+        showNotif('Browser tidak mendukung geolocation.');
+        return;
+    }
+
+    const btn = document.getElementById('btnCenter');
+    btn.disabled = true;
+    btn.textContent = 'Mencari...';
+
+    navigator.geolocation.getCurrentPosition(
+        (pos) => {
+            const coord = [pos.coords.longitude, pos.coords.latitude];
+
+            if (isQgisActive()) {
+                const inside = qgisLocate(coord);
+                if (inside) {
+                    showNotif('Lokasi Anda berhasil ditemukan.', 'success');
+                } else {
+                    showNotif('Lokasi Anda di luar daerah cakupan peta.');
+                }
+            } else {
+                if (userMarker) userMarker.remove();
+                userMarker = new mapboxgl.Marker({ color: bounds.contains(coord) ? '#16a34a' : '#dc2626' })
+                    .setLngLat(coord)
+                    .addTo(map);
+
+                map.flyTo({
+                    center: coord,
+                    zoom: bounds.contains(coord) ? 17 : 14
+                });
+
+                if (bounds.contains(coord)) {
+                    showNotif('Lokasi Anda berhasil ditemukan.', 'success');
+                } else {
+                    showNotif('Lokasi Anda di luar daerah cakupan peta.');
+                }
+            }
+
+            btn.disabled = false;
+            btn.textContent = 'Lokasi Anda';
+        },
+        (err) => {
+            let msg = 'Lokasi tidak bisa diakses.';
+            if (err.code === 1) msg = 'Izin lokasi ditolak browser.';
+            if (err.code === 2) msg = 'Lokasi tidak tersedia.';
+            if (err.code === 3) msg = 'Permintaan lokasi timeout.';
+            showNotif(msg);
+            btn.disabled = false;
+            btn.textContent = 'Lokasi Anda';
+        },
+        {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0
+        }
+    );
+});
+
+/* Sidebar */
+document.getElementById('btnToggleMenu').addEventListener('click', () => {
+    document.getElementById('sidebar').classList.toggle('show');
+    renderLayerControls();
+    syncMiniChecks();
+});
+
+document.querySelectorAll('.sidebar-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.sidebar-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    });
+});
+
+/* Mini layer */
+document.getElementById('miniHotel').addEventListener('change', e => { toggleLayer('hotel', e.target.checked); renderLayerControls(); });
+document.getElementById('miniRS').addEventListener('change', e => { toggleLayer('rs', e.target.checked); renderLayerControls(); });
+document.getElementById('miniSekolah').addEventListener('change', e => { toggleLayer('sekolah', e.target.checked); renderLayerControls(); });
+document.getElementById('miniBangunan').addEventListener('change', e => { toggleLayer('bangunan', e.target.checked); renderLayerControls(); });
+
+document.querySelectorAll('.mini-zoom-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        zoomToSource(btn.dataset.zoomLayer);
+    });
+});
+
+/* Place search */
+function attachPlaceSearch(inputId, resultId) {
+    const input = document.getElementById(inputId);
+    const resultBox = document.getElementById(resultId);
+    let timer = null;
+
+    input.addEventListener('input', function () {
+        clearTimeout(timer);
+        const q = this.value.trim();
+        if (q.length < 3) {
+            resultBox.innerHTML = '';
+            return;
+        }
+
+        timer = setTimeout(async () => {
+            try {
+                const url = 'https://nominatim.openstreetmap.org/search?format=json&q=' + encodeURIComponent(q);
+                const res = await fetch(url);
+                const data = await res.json();
+
+                resultBox.innerHTML = '';
+                data.slice(0, 8).forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = 'result-item';
+                    div.textContent = item.display_name;
+                    div.addEventListener('click', () => {
+                        const coord = [parseFloat(item.lon), parseFloat(item.lat)];
+                        if (isQgisActive()) {
+                            qgisCenterToLonLat(coord, 16);
+                        } else {
+                            map.flyTo({ center: coord, zoom: 16 });
+                        }
+                        input.value = item.display_name;
+                        resultBox.innerHTML = '';
+                    });
+                    resultBox.appendChild(div);
+                });
+            } catch {
+                resultBox.innerHTML = '<div class="result-item">Gagal mencari lokasi</div>';
+            }
+        }, 400);
+    });
+}
+attachPlaceSearch('placeSearch', 'placeResults');
+attachPlaceSearch('placeSearchSidebar', 'placeResultsSidebar');
+
+/* Feature search */
+function attachFeatureSearch(inputId, resultId) {
+    const input = document.getElementById(inputId);
+    const out = document.getElementById(resultId);
+
+    input.addEventListener('input', function () {
+        const q = this.value.trim().toLowerCase();
+        out.innerHTML = '';
+        if (q.length < 2) return;
+
+        let found = 0;
+
+        if (isQgisActive()) {
+            const results = qgisSearchFeatures(q, 20);
+            results.forEach(item => {
+                found++;
+                const div = document.createElement('div');
+                div.className = 'result-item';
+                div.textContent = item.label;
+                div.addEventListener('click', () => qgisZoomToFeature(item.feature));
+                out.appendChild(div);
+            });
+        } else {
+            Object.keys(layerConfig).forEach(key => {
+                const src = map.getSource(key);
+                if (!src || !src._data) return;
+
+                src._data.features.forEach(ft => {
+                    if (found >= 20) return;
+                    const props = ft.properties || {};
+                    const txt = JSON.stringify(props).toLowerCase();
+
+                    if (txt.includes(q)) {
+                        found++;
+                        const div = document.createElement('div');
+                        div.className = 'result-item';
+                        div.textContent = layerConfig[key].label + ' - ' + getFeatureLabel(props);
+                        div.addEventListener('click', () => {
+                            const b = new mapboxgl.LngLatBounds();
+                            const collect = (arr) => {
+                                if (!Array.isArray(arr)) return;
+                                if (typeof arr[0] === 'number' && typeof arr[1] === 'number') {
+                                    b.extend(arr);
+                                    return;
+                                }
+                                arr.forEach(collect);
+                            };
+                            collect(ft.geometry.coordinates);
+                            map.fitBounds(b, { padding: 80, duration: 700, maxZoom: 18 });
+                        });
+                        out.appendChild(div);
+                    }
+                });
+            });
+        }
+
+        if (!found) out.innerHTML = '<div class="result-item">Data tidak ditemukan</div>';
+    });
+}
+attachFeatureSearch('featureSearch', 'featureResults');
+attachFeatureSearch('featureSearchSidebar', 'featureResultsSidebar');
+
+/* Routing */
+document.querySelectorAll('.route-actions button[data-profile]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.route-actions button[data-profile]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        routingProfile = btn.dataset.profile;
+        if (startCoord && endCoord) drawRoute();
+    });
+});
+
+async function drawRoute() {
+    if (!startCoord || !endCoord) {
+        showNotif('Pilih titik awal dan tujuan dengan klik peta.');
+        return;
+    }
+
+    routeInfo.innerHTML = '';
+
+    try {
+        const profile = routingProfile === 'walking' ? 'foot' : 'driving';
+        const url = `https://router.project-osrm.org/route/v1/${profile}/${startCoord[0]},${startCoord[1]};${endCoord[0]},${endCoord[1]}?overview=full&geometries=geojson`;
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (!data.routes || !data.routes.length) {
+            showNotif('Rute tidak ditemukan.');
+            return;
+        }
+
+        const routeData = {
+            type: 'Feature',
+            geometry: data.routes[0].geometry
+        };
+
+        if (isQgisActive()) {
+            const ctx = ensureQgisRouteLayer();
+            if (ctx) {
+                const ol = ctx.ol;
+                ctx.__customRouteSource.clear();
+
+                const coords = routeData.geometry.coordinates.map(c => ol.proj.fromLonLat(c));
+                const feat = new ol.Feature({
+                    geometry: new ol.geom.LineString(coords)
+                });
+                ctx.__customRouteSource.addFeature(feat);
+                ctx.map.getView().fit(feat.getGeometry().getExtent(), {
+                    padding: [80,80,80,80],
+                    duration: 800
+                });
+            }
+        } else {
+            if (map.getSource('route')) {
+                map.getSource('route').setData(routeData);
+            } else {
+                map.addSource('route', {
+                    type: 'geojson',
+                    data: routeData
+                });
+                map.addLayer({
+                    id: 'route-line',
+                    type: 'line',
+                    source: 'route',
+                    paint: {
+                        'line-color': '#2563eb',
+                        'line-width': 5
+                    }
+                });
+            }
+
+            const b = new mapboxgl.LngLatBounds();
+            routeData.geometry.coordinates.forEach(c => b.extend(c));
+            map.fitBounds(b, { padding: 80, duration: 800 });
+        }
+
+        routeInfo.innerHTML =
+            '<b>Jarak:</b> ' + (data.routes[0].distance / 1000).toFixed(2) + ' km<br>' +
+            '<b>Estimasi waktu:</b> ' + Math.round(data.routes[0].duration / 60) + ' menit';
+    } catch (err) {
+        console.error(err);
+        showNotif('Gagal membuat rute.');
+    }
+}
+
+document.getElementById('btnRoute').addEventListener('click', drawRoute);
+
+document.getElementById('btnClearRoute').addEventListener('click', () => {
+    resetRouteSelection();
+});
+
+/* qgis fullscreen */
+function openQgisFullscreen() {
+    document.getElementById('sidebar').classList.remove('show');
+    qgisFullscreen.classList.add('show');
+    qgisActiveBadge.classList.add('show');
+    qgisFullscreenFrame.src = './qgis2web/index.html';
+
+    setTimeout(() => {
+        renderLayerControls();
+        syncMiniChecks();
+    }, 900);
+}
+
+function closeQgisFullscreen() {
+    qgisFullscreen.classList.remove('show');
+    qgisActiveBadge.classList.remove('show');
+    renderLayerControls();
+    syncMiniChecks();
+}
+
+document.getElementById('btnOpenQgisFullscreen').addEventListener('click', openQgisFullscreen);
+document.getElementById('btnCloseQgisInline').addEventListener('click', closeQgisFullscreen);
+
+qgisFullscreenFrame.addEventListener('load', () => {
+    renderLayerControls();
+    syncMiniChecks();
+    qgisBindClickRouting();
+});
+</script>
+</body>
+</html>
